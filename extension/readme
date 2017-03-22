@@ -1,0 +1,2 @@
+This c-extension is for cosine distance computing.
+In the environment with python 3.6 install, you can use "python setup.py install" to install this extension.
