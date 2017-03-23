@@ -17,7 +17,7 @@ def removeHFEFromFile(kbDict,hfePath='hfe.utf8',encode='utf8'):
     return kbDictCopy
 
 
-# 高频实体的定义：if subject出现在training-set中150次以上 and subject出现在testing-set中150次以上  
+# 高频实体的定义：subject出现在training-set和testing-set中的总共次数在150次以上
 def generateHighFreqEntityList(lKey,inputPath1 = 'nlpcc-iccpol-2016.kbqa.training-data',\
                                inputPath2 = 'nlpcc-iccpol-2016.kbqa.testing-data',\
                                outputPath = 'hfe',encode='utf8',threshold = 150):
@@ -29,37 +29,29 @@ def generateHighFreqEntityList(lKey,inputPath1 = 'nlpcc-iccpol-2016.kbqa.trainin
 
     fotxt=open(outputPath+'.txt','w',encoding=encode)
 
-    entityCountInTrainingQ = {}
-    entityCountInTestingQ = {}
-    listTrainingQ = []
-    listTestingQ = []
-    hfe = {}
+    entityCountInQ = {}
 
+    listQ = []
+    hfe = {}
+    
     for line in fi1:
         if line[1] == 'q':
-            listTrainingQ.append(line[line.index('\t')+1:].strip())
+            listQ.append(line[line.index('\t')+1:].strip())
         
     for line in fi2:
         if line[1] == 'q':
-            listTestingQ.append(line[line.index('\t')+1:].strip())
+            listQ.append(line[line.index('\t')+1:].strip())
 
     i = 0
     for key in lKey:   
-        for qStr in listTrainingQ:
+        for qStr in listQ:
             if key in qStr:
-                if key in entityCountInTrainingQ:
-                    entityCountInTrainingQ[key] += 1
+                if key in entityCountInQ:
+                    entityCountInQ[key] += 1
                 else:
-                    entityCountInTrainingQ[key] = 1
-        if key in entityCountInTrainingQ and entityCountInTrainingQ[key] > threshold:
-            for qStr in listTestingQ:
-                if key in qStr:
-                    if key in entityCountInTestingQ:
-                        entityCountInTestingQ[key] += 1
-                    else:
-                        entityCountInTestingQ[key] = 1
-            if key in entityCountInTestingQ and entityCountInTestingQ[key] > threshold:
-                hfe[key] = [entityCountInTrainingQ[key],entityCountInTestingQ[key]]
+                    entityCountInQ[key] = 1
+        if key in entityCountInQ and entityCountInQ[key] > threshold:
+            hfe[key] = entityCountInQ[key]
         i += 1
         print(str(i),end='\r',flush=True)
 
@@ -80,6 +72,8 @@ def loadKB(path, encode = 'utf8'):
     fi = open(path, 'r', encoding=encode)
     pattern = re.compile(r'[·•\-\s]|(\[[0-9]*\])')
 
+    patternSub = re.compile(r'(\(.*\))|(（.*）)|(\s*)')  # subject需按照 subject (Description) || Predicate || Object 的方式抽取, 其中(Description)可选
+
     kbDict={}
     newEntityDic={}
     i = 0
@@ -87,6 +81,8 @@ def loadKB(path, encode = 'utf8'):
         i += 1
         print('exporting the ' + str(i) + ' triple', end='\r', flush=True)
         entityStr = line[:line.index(' |||')].strip()
+        if patternSub.match(entityStr):
+            entityStr, num = patternSub.subn('', entityStr)
         tmp = line[line.index('||| ') + 4:]
         relationStr = tmp[:tmp.index(' |||')].strip()
         relationStr, num = pattern.subn('', relationStr)
@@ -104,6 +100,7 @@ def loadKB(path, encode = 'utf8'):
 
 print('Cleaning kb......')
 kbDict = loadKB('nlpcc-iccpol-2016.kbqa.kb')
+print('Removing HFE from kb......')
 json.dump(removeHFE(kbDict,generateHighFreqEntityList(list(kbDict))),open('kbJson.cleanPre.NHFE.utf8','w',encoding='utf8'))
 print('\nDone!')
 
