@@ -99,7 +99,7 @@ def getAnswer(sub, pre, kbDict):
 
 
 def answerQ (qRaw, lKey, kbDict, qtList, vectorDict, threshold=0, debug=False):
-    q = qRaw.strip()
+    q = qRaw.strip().lower()
     
     candidateSet = set()
     

@@ -72,7 +72,7 @@ def loadKB(path, encode = 'utf8'):
     fi = open(path, 'r', encoding=encode)
     pattern = re.compile(r'[·•\-\s]|(\[[0-9]*\])')
 
-    patternSub = re.compile(r'(\(.*\))|(（.*）)|(\s*)')  # subject需按照 subject (Description) || Predicate || Object 的方式抽取, 其中(Description)可选
+    patternSub = re.compile(r'(\s*\(.*\)\s*)|(\s*（.*）\s*)')  # subject需按照 subject (Description) || Predicate || Object 的方式抽取, 其中(Description)可选
 
     kbDict={}
     newEntityDic={}
@@ -80,8 +80,8 @@ def loadKB(path, encode = 'utf8'):
     for line in fi:
         i += 1
         print('exporting the ' + str(i) + ' triple', end='\r', flush=True)
-        entityStr = line[:line.index(' |||')].strip()
-        if patternSub.match(entityStr):
+        entityStr = line[:line.index(' |||')].strip().lower()
+        if patternSub.search(entityStr):  #match只检测string的开始位置是否匹配, search查找返回第一个
             entityStr, num = patternSub.subn('', entityStr)
         tmp = line[line.index('||| ') + 4:]
         relationStr = tmp[:tmp.index(' |||')].strip()
