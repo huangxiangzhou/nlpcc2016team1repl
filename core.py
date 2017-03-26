@@ -89,10 +89,12 @@ class answerCandidate:
         return self.score
 
 def getAnswer(sub, pre, kbDict):
+    answerList = []
     for kb in kbDict[sub]:
         if pre in kb:
-            return kb[pre]
-    return 'NO ANSWER FOUND BY QA SYSTEM'
+            answerList.append(kb[pre])
+   
+    return answerList
 
     
 
@@ -193,17 +195,20 @@ def answerAllQ(pathInput, pathOutput, lKey, kbDict, qtList, vectorDict, qIDstart
         result = answerQ(q, lKey, kbDict, qtList, vectorDict)
         fo.write('<question id='+str(i)+'>\t' + q.lower() + '\n')
         if len(result) != 0:
-            answerSet = set()
+            answerSet = []
             fo.write('<triple id='+str(i)+'>\t')
             for res in result:
                 answerTmp = getAnswer(res.sub, res.pre, kbDict)
-                answerSet.add(answerTmp)
+                answerSet.append(answerTmp)
                 fo.write(res.sub.lower() + ' ||| ' + res.pre.lower() + ' ||| '\
-                         + answerTmp  + ' ||| ' + str(res.score) + ' ====== ')
+                         + str(answerTmp)  + ' ||| ' + str(res.score) + ' ====== ')
             fo.write('\n')
             fo.write('<answer id='+str(i)+'>\t')
             for ansTmp in answerSet:
-                fo.write(ansTmp)
+                for ans in ansTmp:
+                    fo.write(ans)
+                    if len(ansTmp) > 1:
+                        fo.write(' | ')
                 if len(answerSet) > 1:
                     fo.write(' ||| ')
             fo.write('\n==================================================\n')
