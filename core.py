@@ -191,14 +191,14 @@ def answerAllQ(pathInput, pathOutput, lKey, kbDict, qtList, vectorDict, qIDstart
     for q in listQ:
         fo = open(pathOutput, 'a', encoding='utf8')
         result = answerQ(q, lKey, kbDict, qtList, vectorDict)
-        fo.write('<question id='+str(i)+'>\t' + q + '\n')
+        fo.write('<question id='+str(i)+'>\t' + q.lower() + '\n')
         if len(result) != 0:
             answerSet = set()
             fo.write('<triple id='+str(i)+'>\t')
             for res in result:
                 answerTmp = getAnswer(res.sub, res.pre, kbDict)
                 answerSet.add(answerTmp)
-                fo.write(res.sub + ' ||| ' + res.pre + ' ||| '\
+                fo.write(res.sub.lower() + ' ||| ' + res.pre.lower() + ' ||| '\
                          + answerTmp  + ' ||| ' + str(res.score) + ' ====== ')
             fo.write('\n')
             fo.write('<answer id='+str(i)+'>\t')
