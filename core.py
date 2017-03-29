@@ -194,6 +194,7 @@ def answerAllQ(pathInput, pathOutput, lKey, kbDict, qtList, vectorDict, qIDstart
         fo = open(pathOutput, 'a', encoding='utf8')
         result = answerQ(q, lKey, kbDict, qtList, vectorDict)
         fo.write('<question id='+str(i)+'>\t' + q.lower() + '\n')
+        answerLast = ''
         if len(result) != 0:
             answerSet = []
             fo.write('<triple id='+str(i)+'>\t')
@@ -204,13 +205,28 @@ def answerAllQ(pathInput, pathOutput, lKey, kbDict, qtList, vectorDict, qIDstart
                          + str(answerTmp)  + ' ||| ' + str(res.score) + ' ====== ')
             fo.write('\n')
             fo.write('<answer id='+str(i)+'>\t')
+
+            answerLast = answerSet[0][0]
+            mulAnswer = False
             for ansTmp in answerSet:
                 for ans in ansTmp:
-                    fo.write(ans)
-                    if len(ansTmp) > 1:
-                        fo.write(' | ')
-                if len(answerSet) > 1:
-                    fo.write(' ||| ')
+                    if ans != answerLast:
+                        mulAnswer = True
+                        continue
+                if mulAnswer == True:
+                    continue
+
+            if mulAnswer == True:
+                for ansTmp in answerSet:
+                    for ans in ansTmp:
+                        fo.write(ans)
+                        if len(ansTmp) > 1:
+                            fo.write(' | ')
+                    if len(answerSet) > 1:
+                        fo.write(' ||| ')
+            else:
+                fo.write(answerLast)
+                
             fo.write('\n==================================================\n')
         else:
             fo.write('<triple id='+str(i)+'>\t')
